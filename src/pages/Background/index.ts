@@ -1,4 +1,4 @@
-import { getBrowser, getCurrentTabInfo } from '../../@/lib/utils.ts';
+import { getBrowser, getCurrentTabInfo, updateBadge } from '../../@/lib/utils.ts';
 // import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode;
 import { getConfig, isConfigured } from '../../@/lib/config.ts';
 import {
@@ -182,6 +182,15 @@ const browser = getBrowser();
 //     }
 //   }
 // );
+
+browser.tabs.onUpdated.addListener(async (_tabId, _changeInfo, tab) => {
+  await updateBadge(tab.url);
+});
+
+browser.tabs.onActivated.addListener(async (activeInfo) => {
+  const tab = await browser.tabs.get(activeInfo.tabId);
+  await updateBadge(tab.url);
+});
 
 // This is for the context menus!
 // Example taken from: https://github.com/GoogleChrome/chrome-extensions-samples/blob/main/api-samples/contextMenus/basic/sample.js

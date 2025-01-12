@@ -16,7 +16,7 @@ import { Input } from './ui/Input.tsx';
 import { Button } from './ui/Button.tsx';
 import { TagInput } from './TagInput.tsx';
 import { Textarea } from './ui/Textarea.tsx';
-import { checkDuplicatedItem, getCurrentTabInfo } from '../lib/utils.ts';
+import { checkDuplicatedItem, getCurrentTabInfo, updateBadge } from '../lib/utils.ts';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { getConfig, isConfigured } from '../lib/config.ts';
@@ -103,6 +103,7 @@ const BookmarkForm = () => {
       return;
     },
     onSuccess: () => {
+      updateBadge()
       setTimeout(() => {
         window.close();
         // I want to show some confirmation before it's closed...

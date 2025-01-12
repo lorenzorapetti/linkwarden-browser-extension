@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/Select.tsx'; // Import the Select component
+import { Checkbox } from './ui/CheckBox.tsx';
 
 const OptionsForm = () => {
   const form = useForm<optionsFormValues>({
@@ -48,6 +49,7 @@ const OptionsForm = () => {
       password: '',
       apiKey: '',
       syncBookmarks: false,
+      showBadge: false,
       defaultCollection: 'Unorganized',
     },
   });
@@ -80,6 +82,7 @@ const OptionsForm = () => {
         password: '',
         apiKey: '',
         syncBookmarks: false,
+        showBadge: false,
         defaultCollection: 'Unorganized',
       });
       await clearConfig();
@@ -108,6 +111,24 @@ const OptionsForm = () => {
         };
       } else {
         // Handle Username/Password authentication
+
+        // If the user has chosen the username/password method, but
+        // username and password are empty and we have the apiKey,
+        // we only update the config
+        if (values.username === '' && values.password === '') {
+          const config = await getConfig();
+          if (config.apiKey) {
+            return {
+              ...values,
+              data: {
+                response: {
+                  token: config.apiKey,
+                },
+              },
+            };
+          }
+        }
+
         const session = await getSession(
           values.baseUrl,
           values.username,
@@ -157,6 +178,7 @@ const OptionsForm = () => {
         baseUrl: values.baseUrl,
         defaultCollection: values.defaultCollection,
         syncBookmarks: values.syncBookmarks,
+        showBadge: values.showBadge,
         apiKey:
           values.method === 'apiKey' && values.apiKey
             ? values.apiKey
@@ -344,6 +366,27 @@ const OptionsForm = () => {
             )}
           />
           */}
+
+          <FormField
+            control={control}
+            name="showBadge"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Show visited badge</FormLabel>
+                <FormDescription>
+                  Shows a badge on the extension icon when you visit a saved
+                  link
+                </FormDescription>
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="flex justify-between">
             <div>

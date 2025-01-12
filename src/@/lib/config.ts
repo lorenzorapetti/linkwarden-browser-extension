@@ -1,4 +1,4 @@
-import { getStorageItem, setStorageItem } from './utils.ts';
+import { getStorageItem, setStorageItem, updateBadge } from './utils.ts';
 import { configType } from './validators/config.ts';
 
 const DEFAULTS: configType = {
@@ -6,6 +6,7 @@ const DEFAULTS: configType = {
   apiKey: '',
   defaultCollection: 'Unorganized',
   syncBookmarks: false,
+  showBadge: false,
 };
 
 const CONFIG_KEY = 'linkwarden_config';
@@ -16,7 +17,11 @@ export async function getConfig(): Promise<configType> {
 }
 
 export async function saveConfig(config: configType) {
-  return await setStorageItem(CONFIG_KEY, JSON.stringify(config));
+  const newConfig = await setStorageItem(CONFIG_KEY, JSON.stringify(config));
+
+  await updateBadge()
+
+  return newConfig
 }
 
 export async function isConfigured() {
@@ -30,13 +35,18 @@ export async function isConfigured() {
 }
 
 export async function clearConfig() {
-  return await setStorageItem(
+  const newConfig = await setStorageItem(
     CONFIG_KEY,
     JSON.stringify({
       baseUrl: '',
       apiKey: '',
       defaultCollection: 'Unorganized',
       syncBookmarks: false,
+      showBadge: false,
     })
   );
+
+  await updateBadge()
+
+  return newConfig;
 }

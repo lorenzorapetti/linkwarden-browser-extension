@@ -106,3 +106,19 @@ export async function getLinksFetch(
   });
   return await response.json();
 }
+
+export async function getLinkByUrlFetch(
+  baseUrl: string,
+  linkUrl: string,
+  apiKey: string
+): Promise<bookmarkMetadata> {
+  // Normalize query params
+  const params = new URLSearchParams({ searchByUrl: 'true', searchQueryString: linkUrl });
+  const url = `${baseUrl}/api/v1/links?${params.toString()}`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  return (await response.json() as { response: bookmarkMetadata[] }).response[0];
+}

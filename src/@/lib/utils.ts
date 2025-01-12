@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { getLinksFetch } from './actions/links.ts';
-import { getConfig } from './config.ts';
+import { getLinkByUrlFetch, getLinksFetch } from './actions/links.ts';
+import { getConfig, isConfigured } from './config.ts';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -56,4 +56,51 @@ export async function setStorageItem(key: string, value: string) {
 
 export function openOptions() {
   getBrowser().runtime.openOptionsPage();
+}
+
+export async function updateBadge(url?: string | undefined) {
+  const currentUrl = url || (await getCurrentTabInfo()).url;
+
+  if (!currentUrl) {
+    return
+  }
+
+  const configured = await isConfigured();
+
+  if (!configured) {
+    return;
+  }
+
+  const config = await getConfig();
+  const browser = getBrowser();
+
+  if (!config.showBadge) {
+    // Make sure that the badge is hidden
+    browser.action.setBadgeText({
+      text: '',
+    });
+    return;
+  }
+
+  try {
+    const existingLink = await getLinkByUrlFetch(config.baseUrl, currentUrl, config.apiKey);
+
+    if (existingLink) {
+      browser.action.setBadgeText({
+        text: '✓',
+      });
+      browser.action.setBadgeBackgroundColor({
+        color: '#02B902',
+      });
+      browser.action.setBadgeTextColor({
+        color: '#ffffff',
+      });
+    } else {
+      browser.action.setBadgeText({
+        text: '',
+      });
+    }
+  } catch (error) {
+    console.error(error)
+  }
 }
